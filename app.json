@@ -1,0 +1,67 @@
+{
+  "name": "triptree-api",
+  "description": "TripTree API server (Express + MongoDB)",
+  "keywords": ["node", "express", "mongodb", "monorepo"],
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "https://github.com/lstoll/heroku-buildpack-monorepo"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "APP_BASE": {
+      "description": "Monorepo subdirectory containing the server (Procfile, package.json)",
+      "value": "server",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node.js environment",
+      "value": "production"
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB connection string (e.g. MongoDB Atlas)",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token signing",
+      "required": true,
+      "generator": "secret"
+    },
+    "PORTONE_API_SECRET": {
+      "description": "PortOne V2 API secret for payment verification",
+      "required": false
+    },
+    "BANK_ACCOUNT_BANK": {
+      "description": "Bank name shown for bank transfer orders",
+      "required": false
+    },
+    "BANK_ACCOUNT_NUMBER": {
+      "description": "Bank account number for bank transfer orders",
+      "required": false
+    },
+    "BANK_ACCOUNT_HOLDER": {
+      "description": "Bank account holder name for bank transfer orders",
+      "required": false
+    },
+    "SOLAPI_API_KEY": {
+      "description": "SOLAPI API key for SMS notifications",
+      "required": false
+    },
+    "SOLAPI_API_SECRET": {
+      "description": "SOLAPI API secret for SMS notifications",
+      "required": false
+    },
+    "SOLAPI_SENDER_NUMBER": {
+      "description": "SOLAPI registered sender phone number",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  }
+}
