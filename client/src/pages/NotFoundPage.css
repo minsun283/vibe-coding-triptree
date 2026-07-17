@@ -1,0 +1,55 @@
+.not-found-page {
+  --content-padding: clamp(1.25rem, 2.35vw, 2.5rem);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--content-padding);
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.not-found-page__inner {
+  width: min(100%, 480px);
+  padding: clamp(2rem, 6vw, 3rem);
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #ffffff;
+  text-align: center;
+}
+
+.not-found-page__title {
+  margin: 0 0 0.75rem;
+  color: var(--color-primary, #ef5a31);
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.not-found-page__message {
+  margin: 0 0 1.5rem;
+  color: #64748b;
+  font-size: clamp(0.9375rem, 2.5vw, 1.0625rem);
+  line-height: 1.6;
+}
+
+.not-found-page__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  background: var(--color-primary, #ef5a31);
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.not-found-page__button:hover {
+  background: var(--color-primary-hover, #d94e28);
+}

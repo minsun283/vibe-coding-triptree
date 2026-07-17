@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primary: #ef5a31;
+  --color-primary-hover: #d94e28;
+  --color-primary-light: rgba(239, 90, 49, 0.12);
+  --color-primary-border: rgba(239, 90, 49, 0.45);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  overflow-x: hidden;
+}

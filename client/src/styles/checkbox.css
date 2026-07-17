@@ -1,0 +1,105 @@
+/* 사이트 공통 커스텀 체크박스 */
+
+.app-checkbox,
+.cart-page__select-all,
+.cart-page__item-select,
+.product-create-checkbox,
+.checkout-consent,
+.login-remember,
+.signup-agreement {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-checkbox input[type='checkbox'],
+.cart-page__select-all input[type='checkbox'],
+.cart-page__item-select input[type='checkbox'],
+.product-create-checkbox input[type='checkbox'],
+.checkout-consent input[type='checkbox'],
+.login-remember input[type='checkbox'],
+.signup-agreement input[type='checkbox'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  accent-color: var(--color-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+.app-checkbox__control,
+.cart-page__checkbox-control,
+.product-create-checkbox__control,
+.checkout-consent__control {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid #9ca3af;
+  border-radius: 0.375rem;
+  background: #ffffff;
+  pointer-events: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.app-checkbox__control::after,
+.cart-page__checkbox-control::after,
+.product-create-checkbox__control::after,
+.checkout-consent__control::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.app-checkbox.is-checked .app-checkbox__control,
+.cart-page__select-all input:checked + .cart-page__checkbox-control,
+.cart-page__item-select input:checked + .cart-page__checkbox-control,
+.product-create-checkbox.is-checked .product-create-checkbox__control,
+.product-create-checkbox input:checked + .product-create-checkbox__control,
+.checkout-consent.is-checked .checkout-consent__control,
+.checkout-consent input:checked + .checkout-consent__control,
+.login-remember input:checked + .app-checkbox__control,
+.signup-agreement input:checked + .app-checkbox__control {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.app-checkbox.is-checked .app-checkbox__control::after,
+.cart-page__select-all input:checked + .cart-page__checkbox-control::after,
+.cart-page__item-select input:checked + .cart-page__checkbox-control::after,
+.product-create-checkbox.is-checked .product-create-checkbox__control::after,
+.product-create-checkbox input:checked + .product-create-checkbox__control::after,
+.checkout-consent.is-checked .checkout-consent__control::after,
+.checkout-consent input:checked + .checkout-consent__control::after,
+.login-remember input:checked + .app-checkbox__control::after,
+.signup-agreement input:checked + .app-checkbox__control::after {
+  opacity: 1;
+}
+
+.app-checkbox input[type='checkbox']:focus-visible + .app-checkbox__control,
+.cart-page__select-all input[type='checkbox']:focus-visible + .cart-page__checkbox-control,
+.cart-page__item-select input[type='checkbox']:focus-visible + .cart-page__checkbox-control,
+.product-create-checkbox input[type='checkbox']:focus-visible + .product-create-checkbox__control,
+.checkout-consent input[type='checkbox']:focus-visible + .checkout-consent__control,
+.login-remember input[type='checkbox']:focus-visible + .app-checkbox__control,
+.signup-agreement input[type='checkbox']:focus-visible + .app-checkbox__control {
+  outline: 2px solid var(--color-primary-border);
+  outline-offset: 2px;
+}
