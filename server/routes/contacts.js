@@ -18,13 +18,13 @@ router.get('/', optionalAuthenticate, contactController.getContacts);
 // PATCH /api/contacts/:id/comment - 관리자 코멘트 등록/수정
 router.patch('/:id/comment', authenticate, authorizeAdmin, contactController.updateContactComment);
 
-// GET /api/contacts/:id - 상담 문의 상세 조회 (관리자)
-router.get('/:id', authenticate, authorizeAdmin, contactController.getContactById);
+// GET /api/contacts/:id - 상담 문의 상세 조회 (본인 또는 관리자)
+router.get('/:id', authenticate, contactController.getContactById);
 
-// PUT /api/contacts/:id - 상담 문의 수정 (관리자)
-router.put('/:id', authenticate, authorizeAdmin, contactController.updateContact);
+// PUT /api/contacts/:id - 상담 문의 수정 (본인 또는 관리자)
+router.put('/:id', authenticate, contactController.updateContact);
 
-// DELETE /api/contacts/:id - 상담 문의 삭제 (관리자)
-router.delete('/:id', authenticate, authorizeAdmin, contactController.deleteContact);
+// DELETE /api/contacts/:id - 상담 문의 삭제 (본인 또는 관리자)
+router.delete('/:id', authenticate, contactController.deleteContact);
 
 module.exports = router;

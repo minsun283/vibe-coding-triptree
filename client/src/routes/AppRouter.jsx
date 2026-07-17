@@ -12,6 +12,7 @@ import CheckoutPage from '@/pages/CheckoutPage'
 import ContactPage from '@/pages/ContactPage'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
+import MyContactEditPage from '@/pages/MyContactEditPage'
 import MyContactsPage from '@/pages/MyContactsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import OrderCompletePage from '@/pages/OrderCompletePage'
@@ -41,6 +42,7 @@ function AppRouter() {
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/contacts" element={<MyContactsPage />} />
+      <Route path="/profile/contacts/:contactId/edit" element={<MyContactEditPage />} />
       <Route path="/quotes/pay/:token" element={<QuotePayPage />} />
       <Route path="/orders/complete" element={<OrderCompletePage />} />
       <Route path="/login" element={<LoginPage />} />

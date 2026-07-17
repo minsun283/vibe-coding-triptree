@@ -82,7 +82,7 @@ function ContactPage() {
     }
 
     if (!form.groupType) {
-      return '단체 유형을 선택해 주세요.'
+      return '단체유형을 선택해 주세요.'
     }
 
     if (!form.expectedHeadcount) {
@@ -90,7 +90,7 @@ function ContactPage() {
     }
 
     if (!form.programType) {
-      return '단체 프로그램을 선택해 주세요.'
+      return '단체프로그램을 선택해 주세요.'
     }
 
     if (form.memo.length > MAX_MEMO_LENGTH) {
@@ -199,6 +199,76 @@ function ContactPage() {
           </div>
 
           <div className="contact-field">
+            <span className="contact-field__label">단체유형</span>
+            <div className="contact-option-group" role="group" aria-label="단체유형">
+              {GROUP_TYPES.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`contact-option-btn${form.groupType === type ? ' is-selected' : ''}`}
+                  aria-pressed={form.groupType === type}
+                  onClick={() => handleOptionSelect('groupType', type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="contact-field">
+            <span className="contact-field__label">단체프로그램</span>
+            <div className="contact-option-group" role="group" aria-label="단체프로그램">
+              {PROGRAM_TYPES.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`contact-option-btn${form.programType === type ? ' is-selected' : ''}`}
+                  aria-pressed={form.programType === type}
+                  onClick={() => handleOptionSelect('programType', type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="contact-field">
+            <span className="contact-field__label">예상 인원</span>
+            <div className="contact-option-group" role="group" aria-label="예상 인원">
+              {EXPECTED_HEADCOUNTS.map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  className={`contact-option-btn${form.expectedHeadcount === count ? ' is-selected' : ''}`}
+                  aria-pressed={form.expectedHeadcount === count}
+                  onClick={() => handleOptionSelect('expectedHeadcount', count)}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="contact-field">
+            <span className="contact-field__label" id="preferred-date-label">
+              희망 날짜
+              <span className="contact-field__optional">(선택)</span>
+            </span>
+            <HomeDateRangePicker
+              className="contact-date-range"
+              startDate={form.preferredDate}
+              endDate={form.preferredEndDate}
+              onChange={handlePreferredDateChange}
+              emptyLabel="시작일 · 종료일 선택"
+              pendingEndLabel="종료일 선택"
+              dialogAriaLabel="희망 기간 선택"
+              hintSelectingStart="시작일을 선택해 주세요."
+              hintSelectingEnd="종료일을 선택해 주세요."
+            />
+            <p className="contact-field__hint">달력에서 시작일과 종료일을 순서대로 선택해 주세요.</p>
+          </div>
+
+          <div className="contact-field">
             <label htmlFor="phone">
               연락처
               <span className="contact-field__required" aria-hidden="true">
@@ -234,76 +304,6 @@ function ContactPage() {
               autoComplete="email"
               required
             />
-          </div>
-
-          <div className="contact-field">
-            <span className="contact-field__label">단체 유형</span>
-            <div className="contact-option-group" role="group" aria-label="단체 유형">
-              {GROUP_TYPES.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  className={`contact-option-btn${form.groupType === type ? ' is-selected' : ''}`}
-                  aria-pressed={form.groupType === type}
-                  onClick={() => handleOptionSelect('groupType', type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="contact-field">
-            <span className="contact-field__label">예상 인원</span>
-            <div className="contact-option-group" role="group" aria-label="예상 인원">
-              {EXPECTED_HEADCOUNTS.map((count) => (
-                <button
-                  key={count}
-                  type="button"
-                  className={`contact-option-btn${form.expectedHeadcount === count ? ' is-selected' : ''}`}
-                  aria-pressed={form.expectedHeadcount === count}
-                  onClick={() => handleOptionSelect('expectedHeadcount', count)}
-                >
-                  {count}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="contact-field">
-            <span className="contact-field__label" id="preferred-date-label">
-              원하는 날짜
-              <span className="contact-field__optional">(선택)</span>
-            </span>
-            <HomeDateRangePicker
-              className="contact-date-range"
-              startDate={form.preferredDate}
-              endDate={form.preferredEndDate}
-              onChange={handlePreferredDateChange}
-              emptyLabel="시작일 · 종료일 선택"
-              pendingEndLabel="종료일 선택"
-              dialogAriaLabel="희망 기간 선택"
-              hintSelectingStart="시작일을 선택해 주세요."
-              hintSelectingEnd="종료일을 선택해 주세요."
-            />
-            <p className="contact-field__hint">달력에서 시작일과 종료일을 순서대로 선택해 주세요.</p>
-          </div>
-
-          <div className="contact-field">
-            <span className="contact-field__label">단체 프로그램</span>
-            <div className="contact-option-group" role="group" aria-label="단체 프로그램">
-              {PROGRAM_TYPES.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  className={`contact-option-btn${form.programType === type ? ' is-selected' : ''}`}
-                  aria-pressed={form.programType === type}
-                  onClick={() => handleOptionSelect('programType', type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="contact-field">

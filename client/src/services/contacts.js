@@ -38,6 +38,17 @@ export function getMyContacts({ page = 1, limit = 10 } = {}) {
   return apiFetch(`/api/contacts?${params.toString()}`)
 }
 
+export function getContactById(contactId) {
+  return apiFetch(`/api/contacts/${contactId}`)
+}
+
+export function updateContact(contactId, contactData) {
+  return apiFetch(`/api/contacts/${contactId}`, {
+    method: 'PUT',
+    body: JSON.stringify(contactData),
+  })
+}
+
 export function updateContactComment(contactId, { adminComment }) {
   return apiFetch(`/api/contacts/${contactId}/comment`, {
     method: 'PATCH',

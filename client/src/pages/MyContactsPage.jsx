@@ -4,13 +4,17 @@ import { ArrowLeft, ClipboardList } from 'lucide-react'
 import ProductPagination from '@/components/common/ProductPagination'
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
-import { getMyContacts } from '@/services/contacts'
+import { deleteContact, getMyContacts } from '@/services/contacts'
 import { buildQuotePayPath, getQuotes } from '@/services/quotes'
 import { formatPreferredDateRange } from '@/utils/contactDates'
 import '@/pages/HomePage.css'
 import './MyContactsPage.css'
 
 const CONTACTS_PER_PAGE = 10
+
+function canModifyContact(contactQuotes) {
+  return !contactQuotes.some((quote) => quote.status === 'sent' || quote.status === 'paid')
+}
 
 function formatPrice(price) {
   return new Intl.NumberFormat('ko-KR').format(price)
@@ -53,6 +57,8 @@ function MyContactsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [quotes, setQuotes] = useState([])
+  const [deletingId, setDeletingId] = useState('')
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     if (isAuthChecked && !user) {
@@ -84,6 +90,27 @@ function MyContactsPage() {
       setIsLoading(false)
     }
   }, [currentPage])
+
+  const handleDeleteContact = async (contact) => {
+    const confirmed = window.confirm('이 견적 요청을 삭제할까요?')
+
+    if (!confirmed) {
+      return
+    }
+
+    setActionError('')
+    setDeletingId(contact._id)
+
+    try {
+      await deleteContact(contact._id)
+      window.dispatchEvent(new Event('contacts-updated'))
+      await fetchContacts()
+    } catch (deleteError) {
+      setActionError(deleteError.message)
+    } finally {
+      setDeletingId('')
+    }
+  }
 
   const quotesByContact = useMemo(() => {
     const map = {}
@@ -167,45 +194,76 @@ function MyContactsPage() {
 
         {!isLoading && !error && contacts.length > 0 && (
           <>
+            {actionError && (
+              <p className="my-contacts-page__status my-contacts-page__status--error">{actionError}</p>
+            )}
+
             <ul className="my-contacts-list">
               {contacts.map((contact) => {
                 const contactQuotes = quotesByContact[contact._id] ?? []
                 const payableQuote = contactQuotes.find((quote) => quote.status === 'sent' && quote.payToken)
+                const isEditable = canModifyContact(contactQuotes)
+                const isDeleting = deletingId === contact._id
 
                 return (
                 <li key={contact._id} className="my-contacts-card">
                   <div className="my-contacts-card__header">
-                    <div>
-                      <p className="my-contacts-card__program">{contact.programType}</p>
+                    <div className="my-contacts-card__title-wrap">
+                      <h2 className="my-contacts-card__title">
+                        {contact.customerName}님 견적요청서
+                      </h2>
                       <p className="my-contacts-card__date">접수일 {formatDate(contact.createdAt)}</p>
                     </div>
-                    <span className="my-contacts-card__badge">{contact.groupType}</span>
+                    <div className="my-contacts-card__buttons">
+                      <button
+                        type="button"
+                        className="my-contacts-card__btn my-contacts-card__btn--edit"
+                        disabled={!isEditable || isDeleting}
+                        onClick={() => navigate(`/profile/contacts/${contact._id}/edit`)}
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        className="my-contacts-card__btn my-contacts-card__btn--delete"
+                        disabled={!isEditable || isDeleting}
+                        onClick={() => handleDeleteContact(contact)}
+                      >
+                        {isDeleting ? '삭제 중...' : '삭제'}
+                      </button>
+                    </div>
                   </div>
 
-                  <dl className="my-contacts-card__meta">
-                    <div>
-                      <dt>예상 인원</dt>
-                      <dd>{contact.expectedHeadcount}</dd>
-                    </div>
-                    <div>
-                      <dt>희망 날짜</dt>
-                      <dd>
-                        {formatPreferredDateRange(contact.preferredDate, contact.preferredEndDate)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>연락처</dt>
-                      <dd>{contact.phone}</dd>
-                    </div>
-                    <div>
-                      <dt>이메일</dt>
-                      <dd>{contact.email || '-'}</dd>
-                    </div>
-                    <div>
-                      <dt>접수 시간</dt>
-                      <dd>{formatDateTime(contact.createdAt)}</dd>
-                    </div>
-                  </dl>
+                  <div className="my-contacts-card__details">
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">단체유형:</span>
+                      {contact.groupType}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">단체프로그램:</span>
+                      {contact.programType}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">예상 인원:</span>
+                      {contact.expectedHeadcount}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">희망 날짜:</span>
+                      {formatPreferredDateRange(contact.preferredDate, contact.preferredEndDate)}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">연락처:</span>
+                      {contact.phone}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">이메일:</span>
+                      {contact.email || '-'}
+                    </p>
+                    <p className="my-contacts-card__detail-line">
+                      <span className="my-contacts-card__detail-label">접수 시간:</span>
+                      {formatDateTime(contact.createdAt)}
+                    </p>
+                  </div>
 
                   {contact.memo?.trim() && (
                     <div className="my-contacts-card__memo">
@@ -253,6 +311,12 @@ function MyContactsPage() {
 
                   {contactQuotes.some((quote) => quote.status === 'paid') && !payableQuote && (
                     <p className="my-contacts-card__quote-paid">견적 결제가 완료되었습니다.</p>
+                  )}
+
+                  {!isEditable && (
+                    <p className="my-contacts-card__locked">
+                      견적서가 발행되거나 결제가 완료된 요청은 수정·삭제할 수 없습니다.
+                    </p>
                   )}
                 </li>
                 )

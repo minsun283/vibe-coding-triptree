@@ -216,6 +216,36 @@ const findContactById = (id) => {
   return Contact.findById(id);
 };
 
+const isAdmin = (user) => user?.user_type === 'admin';
+
+const isContactOwner = (contact, user) =>
+  Boolean(user?.userId && contact.user?.toString() === user.userId);
+
+const hasBlockingQuote = async (contactId) => {
+  const count = await Quote.countDocuments({
+    contact: contactId,
+    status: { $in: ['sent', 'paid'] },
+  });
+
+  return count > 0;
+};
+
+const assertContactAccess = (contact, user, { allowAdmin = true } = {}) => {
+  if (!contact) {
+    return { error: '상담 문의를 찾을 수 없습니다.', statusCode: 404 };
+  }
+
+  if (allowAdmin && isAdmin(user)) {
+    return { contact };
+  }
+
+  if (!isContactOwner(contact, user)) {
+    return { error: '수정 권한이 없습니다.', statusCode: 403 };
+  }
+
+  return { contact };
+};
+
 // POST /api/contacts
 const createContact = async (req, res) => {
   try {
@@ -307,9 +337,10 @@ const getContacts = async (req, res) => {
 const getContactById = async (req, res) => {
   try {
     const contact = await findContactById(req.params.id);
+    const { error, statusCode } = assertContactAccess(contact, req.user);
 
-    if (!contact) {
-      return res.status(404).json({ message: '상담 문의를 찾을 수 없습니다.' });
+    if (error) {
+      return res.status(statusCode).json({ message: error });
     }
 
     res.json({ contact });
@@ -322,9 +353,16 @@ const getContactById = async (req, res) => {
 const updateContact = async (req, res) => {
   try {
     const contact = await findContactById(req.params.id);
+    const { error, statusCode } = assertContactAccess(contact, req.user);
 
-    if (!contact) {
-      return res.status(404).json({ message: '상담 문의를 찾을 수 없습니다.' });
+    if (error) {
+      return res.status(statusCode).json({ message: error });
+    }
+
+    if (!isAdmin(req.user) && (await hasBlockingQuote(contact._id))) {
+      return res.status(400).json({
+        message: '견적서가 발행되거나 결제가 완료된 요청은 수정할 수 없습니다.',
+      });
     }
 
     const preferredDateError = validatePreferredDateRange(
@@ -399,9 +437,16 @@ const updateContactComment = async (req, res) => {
 const deleteContact = async (req, res) => {
   try {
     const contact = await findContactById(req.params.id);
+    const { error, statusCode } = assertContactAccess(contact, req.user);
 
-    if (!contact) {
-      return res.status(404).json({ message: '상담 문의를 찾을 수 없습니다.' });
+    if (error) {
+      return res.status(statusCode).json({ message: error });
+    }
+
+    if (!isAdmin(req.user) && (await hasBlockingQuote(contact._id))) {
+      return res.status(400).json({
+        message: '견적서가 발행되거나 결제가 완료된 요청은 삭제할 수 없습니다.',
+      });
     }
 
     await Quote.deleteMany({ contact: contact._id });
