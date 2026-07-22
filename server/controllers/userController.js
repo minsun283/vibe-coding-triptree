@@ -58,10 +58,11 @@ const getUserById = async (req, res) => {
   }
 };
 
-// 새 유저 생성
+// 새 유저 생성 (공개 회원가입)
+// user_type은 요청 body에서 받지 않습니다. 관리자 승격은 관리자 전용 API(PUT /api/users/:id)에서만 가능합니다.
 const createUser = async (req, res) => {
   try {
-    const { email, name, password, user_type, address } = req.body;
+    const { email, name, password, address } = req.body;
 
     if (!email?.trim() || !name?.trim() || !password) {
       return res.status(400).json({
@@ -75,7 +76,7 @@ const createUser = async (req, res) => {
       email: email.trim(),
       name: name.trim(),
       password: hashedPassword,
-      user_type: user_type || 'customer',
+      user_type: 'customer',
       address: address?.trim() || undefined,
     });
 
