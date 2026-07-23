@@ -261,8 +261,26 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// 자료실 담당자 선택용 회원 목록 (로그인 회원)
+const getAssigneeOptions = async (req, res) => {
+  try {
+    const users = await User.find().sort({ name: 1 }).select('name email');
+
+    res.json(
+      users.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      }))
+    );
+  } catch (error) {
+    handleUserError(error, res);
+  }
+};
+
 module.exports = {
   getUsers,
+  getAssigneeOptions,
   getUserById,
   createUser,
   loginUser,

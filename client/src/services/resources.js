@@ -50,6 +50,13 @@ export function updateResource(resourceId, resourceData) {
   })
 }
 
+export function updateResourceStatus(resourceId, status) {
+  return apiFetch(`/api/resources/${resourceId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  })
+}
+
 export function addResourceComment(resourceId, content) {
   return apiFetch(`/api/resources/${resourceId}/comments`, {
     method: 'POST',

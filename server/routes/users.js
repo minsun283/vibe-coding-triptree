@@ -8,6 +8,9 @@ const router = express.Router();
 // 본인 정보 조회/수정은 /api/auth/me 를 사용합니다.
 router.post('/', userController.createUser);
 
+// GET /api/users/assignees - 자료실 담당자 선택용 (로그인 회원)
+router.get('/assignees', authenticate, userController.getAssigneeOptions);
+
 // 이하 모든 회원 관리 API는 관리자 전용입니다.
 router.use(authenticate, authorizeAdmin);
 

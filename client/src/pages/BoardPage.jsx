@@ -204,7 +204,7 @@ function BoardPage() {
       {activeTab === 'reviews' ? (
         <BoardCustomerReviews user={user} />
       ) : activeTab === 'resources' ? (
-        <BoardResources isAdmin={isAdmin} isAuthChecked={isAuthChecked} />
+        <BoardResources user={user} isAdmin={isAdmin} isAuthChecked={isAuthChecked} />
       ) : (
         <>
           {activeTab === 'notice' && isAdmin && isNoticeFormOpen && (

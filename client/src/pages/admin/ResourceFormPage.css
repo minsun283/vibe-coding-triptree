@@ -121,6 +121,13 @@
   font-size: 0.8125rem;
 }
 
+.resource-form__member-note {
+  margin: -0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
 .resource-form__file-list {
   display: grid;
   gap: 0.625rem;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, FileUp, Paperclip, X } from 'lucide-react'
+import BoardShell from '@/components/board/BoardShell'
 import { getCloudinaryDocumentWidgetOptions } from '@/config/cloudinary'
 import {
   MAX_CONTENT_LENGTH,
@@ -16,14 +17,17 @@ import {
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { useCloudinaryWidget } from '@/hooks/useCloudinaryWidget'
 import { createResource, getResourceById, updateResource } from '@/services/resources'
-import { getUsers } from '@/services/users'
+import { getAssigneeOptions, getUsers } from '@/services/users'
 import '@/pages/HomePage.css'
+import '@/pages/BoardPage.css'
 import './ResourceFormPage.css'
 
 function ResourceFormPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams()
   const isEditMode = Boolean(id)
+  const isBoardContext = location.pathname.startsWith('/board/resources')
   const { user, isAuthChecked, isAdmin } = useAuthUser()
   const [form, setForm] = useState(createInitialResourceForm)
   const [users, setUsers] = useState([])
@@ -32,22 +36,36 @@ function ResourceFormPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (isAuthChecked && !isAdmin) {
-      navigate('/', { replace: true })
-    }
-  }, [isAuthChecked, isAdmin, navigate])
-
-  useEffect(() => {
-    if (!isAuthChecked || !isAdmin) {
+    if (!isAuthChecked) {
       return
     }
 
-    getUsers()
+    if (!user) {
+      navigate('/login', {
+        replace: true,
+        state: { from: location.pathname },
+      })
+      return
+    }
+
+    if (isEditMode && !isAdmin) {
+      navigate(isBoardContext ? '/board?tab=resources' : '/', { replace: true })
+    }
+  }, [isAuthChecked, isAdmin, isBoardContext, isEditMode, location.pathname, navigate, user])
+
+  useEffect(() => {
+    if (!isAuthChecked || !user) {
+      return
+    }
+
+    const fetchAssignees = isAdmin ? getUsers() : getAssigneeOptions()
+
+    fetchAssignees
       .then((data) => {
         const members = Array.isArray(data) ? data : []
         setUsers(members)
 
-        if (!isEditMode && members.length > 0 && user?._id) {
+        if (!isEditMode) {
           setForm((prev) => ({
             ...prev,
             assignee: prev.assignee || user._id,
@@ -55,7 +73,7 @@ function ResourceFormPage() {
         }
       })
       .catch(() => setUsers([]))
-  }, [isAuthChecked, isAdmin, isEditMode, user?._id])
+  }, [isAuthChecked, isAdmin, isEditMode, user])
 
   useEffect(() => {
     if (!isEditMode || !isAuthChecked || !isAdmin) {
@@ -197,10 +215,18 @@ function ResourceFormPage() {
     try {
       if (isEditMode) {
         await updateResource(id, payload)
-        navigate(`/admin/resources/${id}`)
+        navigate(isBoardContext ? `/board/resources/${id}` : `/admin/resources/${id}`)
       } else {
-        await createResource(payload)
-        navigate('/admin/resources')
+        const data = await createResource(payload)
+        const resourceId = data.resource?._id
+
+        if (isBoardContext && resourceId) {
+          navigate(`/board/resources/${resourceId}`)
+        } else if (isBoardContext) {
+          navigate('/board?tab=resources')
+        } else {
+          navigate('/admin/resources')
+        }
       }
     } catch (submitError) {
       setError(submitError.message)
@@ -209,206 +235,218 @@ function ResourceFormPage() {
     }
   }
 
-  if (!isAuthChecked || !isAdmin) {
+  const cancelPath = isBoardContext
+    ? '/board?tab=resources'
+    : isEditMode
+      ? `/admin/resources/${id}`
+      : '/admin/resources'
+
+  if (!isAuthChecked || !user || (isEditMode && !isAdmin)) {
     return null
+  }
+
+  const formContent = isLoading ? (
+    <p className="resource-form-message">자료 정보를 불러오는 중...</p>
+  ) : (
+    <form className="resource-form" onSubmit={handleSubmit}>
+      {error && (
+        <p className="resource-form-message resource-form-message--error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <div className="resource-form__field">
+        <label htmlFor="title">제목</label>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          value={form.title}
+          onChange={handleChange}
+          maxLength={MAX_TITLE_LENGTH}
+          placeholder="자료 제목을 입력해 주세요"
+          required
+        />
+      </div>
+
+      <div className="resource-form__field">
+        <label htmlFor="content">내용</label>
+        <textarea
+          id="content"
+          name="content"
+          value={form.content}
+          onChange={handleChange}
+          maxLength={MAX_CONTENT_LENGTH}
+          rows={8}
+          placeholder="업무 내용, 참고 사항 등을 입력해 주세요"
+          required
+        />
+      </div>
+
+      <div className="resource-form__grid resource-form__grid--3">
+        <div className="resource-form__field">
+          <label htmlFor="department">담당부서</label>
+          <select
+            id="department"
+            name="department"
+            value={form.department}
+            onChange={handleChange}
+            required
+          >
+            <option value="">담당부서 선택</option>
+            {RESOURCE_DEPARTMENTS.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="resource-form__field">
+          <label htmlFor="status">진행상황</label>
+          <select
+            id="status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            required
+          >
+            {RESOURCE_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="resource-form__field">
+          <label htmlFor="assignee">담당자</label>
+          <select
+            id="assignee"
+            name="assignee"
+            value={form.assignee}
+            onChange={handleChange}
+            required
+          >
+            <option value="">담당자 선택</option>
+            {assigneeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="resource-form__field">
+        <div className="resource-form__files-header">
+          <label>파일 업로드</label>
+          <span className="resource-form__files-count">
+            {form.files.length}/{MAX_RESOURCE_FILES}
+          </span>
+        </div>
+
+        <div className="resource-form__upload">
+          <button
+            type="button"
+            className="resource-form__upload-btn"
+            onClick={openWidget}
+            disabled={!isUploadReady || form.files.length >= MAX_RESOURCE_FILES}
+          >
+            <FileUp size={18} aria-hidden="true" />
+            파일 선택
+          </button>
+          <p className="resource-form__upload-help">
+            문서, 이미지 등 업무 파일을 업로드할 수 있습니다. (최대 {MAX_RESOURCE_FILES}개)
+          </p>
+        </div>
+
+        {!isUploadConfigured && (
+          <p className="resource-form-message resource-form-message--error">
+            {uploadConfigMessage}
+          </p>
+        )}
+
+        {uploadError && (
+          <p className="resource-form-message resource-form-message--error">{uploadError}</p>
+        )}
+
+        {form.files.length > 0 && (
+          <ul className="resource-form__file-list">
+            {form.files.map((file, index) => (
+              <li
+                key={file._id ?? `${file.url}-${index}`}
+                className="resource-form__file-item"
+              >
+                <div className="resource-form__file-info">
+                  <Paperclip size={16} aria-hidden="true" />
+                  <div>
+                    <p className="resource-form__file-name">{file.originalName}</p>
+                    <p className="resource-form__file-meta">
+                      {formatFileSize(file.size)}
+                      {file.mimeType ? ` · ${file.mimeType}` : ''}
+                      {file.createdAt
+                        ? ` · 등록 ${formatDateTime(file.createdAt)}`
+                        : ' · 저장 시 등록'}
+                    </p>
+                  </div>
+                </div>
+                <div className="resource-form__file-actions">
+                  <a
+                    href={file.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="resource-form__file-link"
+                  >
+                    보기
+                  </a>
+                  <button
+                    type="button"
+                    className="resource-form__file-remove"
+                    onClick={() => handleRemoveFile(index)}
+                    aria-label={`${file.originalName} 삭제`}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="resource-form__actions">
+        <Link to={cancelPath} className="resource-form__cancel">
+          취소
+        </Link>
+        <button type="submit" className="resource-form__submit" disabled={isSubmitting}>
+          {isSubmitting ? '저장 중...' : isEditMode ? '수정하기' : '등록하기'}
+        </button>
+      </div>
+    </form>
+  )
+
+  if (isBoardContext) {
+    return (
+      <BoardShell activeTab="resources">
+        <header className="board-page__header board-page__header--centered">
+          <h1 className="board-page__title">{isEditMode ? '자료 수정' : '자료 등록'}</h1>
+        </header>
+        <div className="board-page__resource-form">{formContent}</div>
+      </BoardShell>
+    )
   }
 
   return (
     <div className="resource-form-page">
       <main className="resource-form-page__content">
         <div className="resource-form-topbar">
-          <Link
-            to={isEditMode ? `/admin/resources/${id}` : '/admin/resources'}
-            className="resource-form-topbar__title"
-          >
+          <Link to={cancelPath} className="resource-form-topbar__title">
             <ArrowLeft size={22} aria-hidden="true" />
             {isEditMode ? '자료 수정' : '자료 등록'}
           </Link>
         </div>
-
-        {isLoading ? (
-          <p className="resource-form-message">자료 정보를 불러오는 중...</p>
-        ) : (
-          <form className="resource-form" onSubmit={handleSubmit}>
-            {error && (
-              <p className="resource-form-message resource-form-message--error" role="alert">
-                {error}
-              </p>
-            )}
-
-            <div className="resource-form__field">
-              <label htmlFor="title">제목</label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                value={form.title}
-                onChange={handleChange}
-                maxLength={MAX_TITLE_LENGTH}
-                placeholder="자료 제목을 입력해 주세요"
-                required
-              />
-            </div>
-
-            <div className="resource-form__field">
-              <label htmlFor="content">내용</label>
-              <textarea
-                id="content"
-                name="content"
-                value={form.content}
-                onChange={handleChange}
-                maxLength={MAX_CONTENT_LENGTH}
-                rows={8}
-                placeholder="업무 내용, 참고 사항 등을 입력해 주세요"
-                required
-              />
-            </div>
-
-            <div className="resource-form__grid resource-form__grid--3">
-              <div className="resource-form__field">
-                <label htmlFor="department">담당부서</label>
-                <select
-                  id="department"
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">담당부서 선택</option>
-                  {RESOURCE_DEPARTMENTS.map((department) => (
-                    <option key={department} value={department}>
-                      {department}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="resource-form__field">
-                <label htmlFor="status">진행상황</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  required
-                >
-                  {RESOURCE_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="resource-form__field">
-                <label htmlFor="assignee">담당자</label>
-                <select
-                  id="assignee"
-                  name="assignee"
-                  value={form.assignee}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">담당자 선택</option>
-                  {assigneeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="resource-form__field">
-              <div className="resource-form__files-header">
-                <label>파일 업로드</label>
-                <span className="resource-form__files-count">
-                  {form.files.length}/{MAX_RESOURCE_FILES}
-                </span>
-              </div>
-
-              <div className="resource-form__upload">
-                <button
-                  type="button"
-                  className="resource-form__upload-btn"
-                  onClick={openWidget}
-                  disabled={!isUploadReady || form.files.length >= MAX_RESOURCE_FILES}
-                >
-                  <FileUp size={18} aria-hidden="true" />
-                  파일 선택
-                </button>
-                <p className="resource-form__upload-help">
-                  문서, 이미지 등 업무 파일을 업로드할 수 있습니다. (최대 {MAX_RESOURCE_FILES}개)
-                </p>
-              </div>
-
-              {!isUploadConfigured && (
-                <p className="resource-form-message resource-form-message--error">
-                  {uploadConfigMessage}
-                </p>
-              )}
-
-              {uploadError && (
-                <p className="resource-form-message resource-form-message--error">{uploadError}</p>
-              )}
-
-              {form.files.length > 0 && (
-                <ul className="resource-form__file-list">
-                  {form.files.map((file, index) => (
-                    <li
-                      key={file._id ?? `${file.url}-${index}`}
-                      className="resource-form__file-item"
-                    >
-                      <div className="resource-form__file-info">
-                        <Paperclip size={16} aria-hidden="true" />
-                        <div>
-                          <p className="resource-form__file-name">{file.originalName}</p>
-                          <p className="resource-form__file-meta">
-                            {formatFileSize(file.size)}
-                            {file.mimeType ? ` · ${file.mimeType}` : ''}
-                            {file.createdAt
-                              ? ` · 등록 ${formatDateTime(file.createdAt)}`
-                              : ' · 저장 시 등록'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="resource-form__file-actions">
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="resource-form__file-link"
-                        >
-                          보기
-                        </a>
-                        <button
-                          type="button"
-                          className="resource-form__file-remove"
-                          onClick={() => handleRemoveFile(index)}
-                          aria-label={`${file.originalName} 삭제`}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="resource-form__actions">
-              <Link
-                to={isEditMode ? `/admin/resources/${id}` : '/admin/resources'}
-                className="resource-form__cancel"
-              >
-                취소
-              </Link>
-              <button type="submit" className="resource-form__submit" disabled={isSubmitting}>
-                {isSubmitting ? '저장 중...' : isEditMode ? '수정하기' : '등록하기'}
-              </button>
-            </div>
-          </form>
-        )}
+        {formContent}
       </main>
     </div>
   )

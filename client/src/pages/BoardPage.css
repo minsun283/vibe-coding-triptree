@@ -239,6 +239,13 @@
   font-size: clamp(1.25rem, 2vw, 1.5rem);
 }
 
+.board-page__resource-form .resource-form {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
 .board-page__notice-form-wrap,
 .board-page__inquiry-form-wrap {
   margin-bottom: 1.5rem;

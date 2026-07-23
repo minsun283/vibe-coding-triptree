@@ -8,7 +8,7 @@ import {
   formatDateTime,
   getDepartmentClassName,
 } from '@/constants/resourceData'
-import { getResources, updateResource } from '@/services/resources'
+import { getResources, updateResourceStatus } from '@/services/resources'
 import { getUsers } from '@/services/users'
 import '@/pages/admin/ResourceManagePage.css'
 
@@ -51,7 +51,7 @@ function getStatusClassName(status) {
   }
 }
 
-function BoardResources({ isAdmin, isAuthChecked }) {
+function BoardResources({ user, isAdmin, isAuthChecked }) {
   const [resources, setResources] = useState([])
   const [users, setUsers] = useState([])
   const [pagination, setPagination] = useState(null)
@@ -67,14 +67,14 @@ function BoardResources({ isAdmin, isAuthChecked }) {
   const [updatingStatusId, setUpdatingStatusId] = useState(null)
 
   useEffect(() => {
-    if (!isAuthChecked || !isAdmin) {
+    if (!isAuthChecked || !isAdmin || !user) {
       return
     }
 
     getUsers()
       .then((data) => setUsers(Array.isArray(data) ? data : []))
       .catch(() => setUsers([]))
-  }, [isAuthChecked, isAdmin])
+  }, [isAuthChecked, isAdmin, user])
 
   const fetchResources = useCallback(async () => {
     setIsLoading(true)
@@ -104,12 +104,12 @@ function BoardResources({ isAdmin, isAuthChecked }) {
   }, [assigneeFilter, currentPage, departmentFilter, searchQuery, statusFilter])
 
   useEffect(() => {
-    if (!isAuthChecked || !isAdmin) {
+    if (!isAuthChecked || !user) {
       return
     }
 
     fetchResources()
-  }, [fetchResources, isAuthChecked, isAdmin])
+  }, [fetchResources, isAuthChecked, user])
 
   const handleSearchSubmit = (event) => {
     event.preventDefault()
@@ -167,7 +167,7 @@ function BoardResources({ isAdmin, isAuthChecked }) {
     )
 
     try {
-      await updateResource(resource._id, { status: nextStatus })
+      await updateResourceStatus(resource._id, nextStatus)
       await fetchResources()
     } catch (updateError) {
       setResources((prev) =>
@@ -213,12 +213,12 @@ function BoardResources({ isAdmin, isAuthChecked }) {
     return <p className="board-page__status">자료를 불러오는 중...</p>
   }
 
-  if (!isAdmin) {
+  if (!user) {
     return (
       <div className="board-page__login-prompt">
-        <p>자료실은 관리자 전용 메뉴입니다.</p>
+        <p>자료실은 로그인한 회원만 이용할 수 있습니다.</p>
         <Link to="/login" state={{ from: '/board?tab=resources' }} className="board-page__login-link">
-          관리자 로그인
+          로그인하기
         </Link>
       </div>
     )
@@ -228,12 +228,16 @@ function BoardResources({ isAdmin, isAuthChecked }) {
     <div className="board-page__resources">
       <div className="board-page__resources-toolbar">
         <p className="board-page__resources-subtitle">
-          업무 자료와 첨부 파일을 확인하고 관리할 수 있습니다.
+          {isAdmin
+            ? '업무 자료와 첨부 파일을 확인하고 관리할 수 있습니다.'
+            : '업무 자료를 등록하고 첨부 파일을 확인할 수 있습니다.'}
         </p>
-        <Link to="/admin/resources/new" className="board-page__resources-create">
-          <Plus size={16} aria-hidden="true" />
-          자료 등록
-        </Link>
+        {user && (
+          <Link to="/board/resources/new" className="board-page__resources-create">
+            <Plus size={16} aria-hidden="true" />
+            자료 등록
+          </Link>
+        )}
       </div>
 
       <section className="resource-manage-panel">
@@ -371,17 +375,19 @@ function BoardResources({ isAdmin, isAuthChecked }) {
               </select>
             </label>
 
-            <label className="resource-manage-toolbar__filter">
-              <span>담당자</span>
-              <select value={assigneeFilter} onChange={handleAssigneeFilterChange}>
-                <option value="">전체</option>
-                {assigneeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {isAdmin && (
+              <label className="resource-manage-toolbar__filter">
+                <span>담당자</span>
+                <select value={assigneeFilter} onChange={handleAssigneeFilterChange}>
+                  <option value="">전체</option>
+                  {assigneeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
         </form>
 

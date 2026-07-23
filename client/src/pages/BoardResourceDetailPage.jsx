@@ -34,7 +34,7 @@ function getStatusClassName(status) {
 function BoardResourceDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { isAuthChecked, isAdmin } = useAuthUser()
+  const { isAuthChecked, isAdmin, user } = useAuthUser()
   const [resource, setResource] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -45,13 +45,13 @@ function BoardResourceDetailPage() {
   const [commentError, setCommentError] = useState('')
 
   useEffect(() => {
-    if (isAuthChecked && !isAdmin) {
-      navigate('/board?tab=resources', { replace: true })
+    if (isAuthChecked && !user) {
+      navigate('/login', { replace: true, state: { from: `/board/resources/${id}` } })
     }
-  }, [isAuthChecked, isAdmin, navigate])
+  }, [id, isAuthChecked, navigate, user])
 
   useEffect(() => {
-    if (!isAuthChecked || !isAdmin || !id) {
+    if (!isAuthChecked || !user || !id) {
       return
     }
 
@@ -71,7 +71,7 @@ function BoardResourceDetailPage() {
     }
 
     fetchResource()
-  }, [id, isAuthChecked, isAdmin])
+  }, [id, isAuthChecked, user])
 
   const handleDownload = async (file) => {
     if (!file?._id) {
@@ -117,13 +117,13 @@ function BoardResourceDetailPage() {
 
   const comments = resource?.comments ?? []
 
-  if (!isAuthChecked || !isAdmin) {
+  if (!isAuthChecked || !user) {
     return null
   }
 
   return (
     <BoardShell activeTab="resources">
-      <header className="board-page__header">
+      <header className="board-page__header board-page__header--centered">
         <h1 className="board-page__title">자료실</h1>
       </header>
 
@@ -134,7 +134,7 @@ function BoardResourceDetailPage() {
             목록으로
           </Link>
 
-          {resource && (
+          {isAdmin && resource && (
             <Link
               to={`/admin/resources/${resource._id}/edit`}
               className="board-page__resource-detail-edit"
@@ -261,7 +261,7 @@ function BoardResourceDetailPage() {
                     <li key={comment._id} className="resource-detail__comment-item">
                       <div className="resource-detail__comment-header">
                         <span className="resource-detail__comment-author">
-                          {comment.user?.name ?? '관리자'}
+                          {comment.user?.name ?? '회원'}
                         </span>
                         <time
                           className="resource-detail__comment-date"

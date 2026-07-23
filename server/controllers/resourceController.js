@@ -312,6 +312,37 @@ const createResource = async (req, res) => {
   }
 };
 
+// PATCH /api/resources/:id/status
+const updateResourceStatus = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+
+    if (!resource) {
+      return res.status(404).json({ message: '자료를 찾을 수 없습니다.' });
+    }
+
+    const status = req.body.status;
+
+    if (!status || !RESOURCE_STATUSES.includes(status)) {
+      return res.status(400).json({ message: '유효하지 않은 진행상황입니다.' });
+    }
+
+    if (resource.status === status) {
+      const populatedResource = await populateResourceQuery(Resource.findById(resource._id));
+      return res.json({ resource: populatedResource });
+    }
+
+    resource.status = status;
+    await resource.save();
+
+    const populatedResource = await populateResourceQuery(Resource.findById(resource._id));
+
+    res.json({ resource: populatedResource });
+  } catch (error) {
+    handleResourceError(error, res);
+  }
+};
+
 // PUT /api/resources/:id
 const updateResource = async (req, res) => {
   try {
@@ -463,6 +494,7 @@ module.exports = {
   getResourceById,
   createResource,
   updateResource,
+  updateResourceStatus,
   deleteResource,
   downloadResourceFile,
   addResourceComment,

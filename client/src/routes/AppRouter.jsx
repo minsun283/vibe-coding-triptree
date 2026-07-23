@@ -39,6 +39,7 @@ function AppRouter() {
       <Route path="/reviews" element={<ReviewsPage />} />
       <Route path="/reviews/write" element={<ReviewWritePage />} />
       <Route path="/reviews/:reviewId/edit" element={<ReviewEditPage />} />
+      <Route path="/board/resources/new" element={<ResourceFormPage />} />
       <Route path="/board/resources/:id" element={<BoardResourceDetailPage />} />
       <Route path="/board" element={<BoardPage />} />
       <Route path="/contact" element={<ContactPage />} />

@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, Search, X } from 'lucide-react'
 import ProductPagination from '@/components/common/ProductPagination'
 import { RESOURCE_DEPARTMENTS, RESOURCE_STATUSES, getDepartmentClassName } from '@/constants/resourceData'
 import { useAuthUser } from '@/hooks/useAuthUser'
-import { getResources, updateResource } from '@/services/resources'
+import { getResources, updateResourceStatus } from '@/services/resources'
 import { getUsers } from '@/services/users'
 import '@/pages/HomePage.css'
 import './ResourceManagePage.css'
@@ -184,7 +184,7 @@ function ResourceManagePage() {
     )
 
     try {
-      await updateResource(resource._id, { status: nextStatus })
+      await updateResourceStatus(resource._id, nextStatus)
       await fetchResources()
     } catch (updateError) {
       setResources((prev) =>
