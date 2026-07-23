@@ -10,6 +10,7 @@ import ProductEditPage from '@/pages/admin/ProductEditPage'
 import ProductManagePage from '@/pages/admin/ProductManagePage'
 import AdminRoute from '@/routes/AdminRoute'
 import BoardPage from '@/pages/BoardPage'
+import BoardResourceDetailPage from '@/pages/BoardResourceDetailPage'
 import CartPage from '@/pages/CartPage'
 import CheckoutPage from '@/pages/CheckoutPage'
 import ContactPage from '@/pages/ContactPage'
@@ -38,6 +39,7 @@ function AppRouter() {
       <Route path="/reviews" element={<ReviewsPage />} />
       <Route path="/reviews/write" element={<ReviewWritePage />} />
       <Route path="/reviews/:reviewId/edit" element={<ReviewEditPage />} />
+      <Route path="/board/resources/:id" element={<BoardResourceDetailPage />} />
       <Route path="/board" element={<BoardPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/cart" element={<CartPage />} />
