@@ -2,6 +2,9 @@ import { Route, Routes } from 'react-router-dom'
 import AdminContactsPage from '@/pages/admin/AdminContactsPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminPage from '@/pages/admin/AdminPage'
+import ResourceDetailPage from '@/pages/admin/ResourceDetailPage'
+import ResourceFormPage from '@/pages/admin/ResourceFormPage'
+import ResourceManagePage from '@/pages/admin/ResourceManagePage'
 import ProductCreatePage from '@/pages/admin/ProductCreatePage'
 import ProductEditPage from '@/pages/admin/ProductEditPage'
 import ProductManagePage from '@/pages/admin/ProductManagePage'
@@ -68,6 +71,38 @@ function AppRouter() {
         element={
           <AdminRoute>
             <AdminOrdersPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/resources"
+        element={
+          <AdminRoute>
+            <ResourceManagePage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/resources/new"
+        element={
+          <AdminRoute>
+            <ResourceFormPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/resources/:id/edit"
+        element={
+          <AdminRoute>
+            <ResourceFormPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/resources/:id"
+        element={
+          <AdminRoute>
+            <ResourceDetailPage />
           </AdminRoute>
         }
       />

@@ -32,17 +32,31 @@ function loadCloudinaryScript() {
   return scriptLoadPromise
 }
 
-export function useCloudinaryWidget({ onSuccess }) {
+export function useCloudinaryWidget({
+  onSuccess,
+  getWidgetOptions = getCloudinaryWidgetOptions,
+  returnFullInfo = false,
+}) {
   const [isReady, setIsReady] = useState(false)
   const [loadError, setLoadError] = useState('')
   const widgetRef = useRef(null)
   const onSuccessRef = useRef(onSuccess)
+  const getWidgetOptionsRef = useRef(getWidgetOptions)
+  const returnFullInfoRef = useRef(returnFullInfo)
   const isConfigured = isCloudinaryConfigured()
   const configMessage = getCloudinaryConfigMessage()
 
   useEffect(() => {
     onSuccessRef.current = onSuccess
   }, [onSuccess])
+
+  useEffect(() => {
+    getWidgetOptionsRef.current = getWidgetOptions
+  }, [getWidgetOptions])
+
+  useEffect(() => {
+    returnFullInfoRef.current = returnFullInfo
+  }, [returnFullInfo])
 
   useEffect(() => {
     if (!isConfigured) {
@@ -59,7 +73,7 @@ export function useCloudinaryWidget({ onSuccess }) {
         }
 
         widgetRef.current = window.cloudinary.createUploadWidget(
-          getCloudinaryWidgetOptions(),
+          getWidgetOptionsRef.current(),
           (error, result) => {
             if (error) {
               console.error(error)
@@ -67,7 +81,9 @@ export function useCloudinaryWidget({ onSuccess }) {
             }
 
             if (result.event === 'success') {
-              onSuccessRef.current?.(result.info.secure_url)
+              onSuccessRef.current?.(
+                returnFullInfoRef.current ? result.info : result.info.secure_url
+              )
             }
           }
         )

@@ -5,6 +5,7 @@ import {
   Bell,
   ClipboardList,
   Eye,
+  FolderOpen,
   Package,
   Plus,
   ShoppingCart,
@@ -261,6 +262,20 @@ function AdminPage() {
                 >
                   <ClipboardList size={18} />
                   견적요청서 확인하기
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-panel">
+              <h2 className="admin-panel__title">자료실</h2>
+              <div className="admin-actions">
+                <button
+                  type="button"
+                  className="admin-action-btn admin-action-btn--default"
+                  onClick={() => navigate('/admin/resources')}
+                >
+                  <FolderOpen size={18} />
+                  자료실 관리하기
                 </button>
               </div>
             </div>

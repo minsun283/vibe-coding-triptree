@@ -52,5 +52,12 @@ export const QUICK_ACTIONS = [
     variant: 'default',
     path: '/admin/products',
   },
+  {
+    id: 'resources',
+    label: '자료실 관리',
+    icon: 'eye',
+    variant: 'default',
+    path: '/admin/resources',
+  },
   { id: 'orders', label: '주문 관리', icon: 'eye', variant: 'default', path: '/admin/orders' },
 ]

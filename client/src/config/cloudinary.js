@@ -55,4 +55,21 @@ export function getCloudinaryWidgetOptions() {
   return options
 }
 
+export function getCloudinaryDocumentWidgetOptions() {
+  const options = {
+    cloudName: cloudinaryEnv.cloudName,
+    uploadPreset: cloudinaryEnv.uploadPreset,
+    sources: ['local', 'url'],
+    multiple: false,
+    resourceType: 'auto',
+    maxFileSize: 20000000,
+  }
+
+  if (cloudinaryEnv.folder) {
+    options.folder = `${cloudinaryEnv.folder}/resources`
+  }
+
+  return options
+}
+
 export default cloudinaryEnv
