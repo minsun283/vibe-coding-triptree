@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const GROUP_TYPES = ['기업', '학교', '공공기관', '동호회', '기타'];
 
@@ -85,6 +86,14 @@ const contactSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    requestNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      uppercase: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -107,3 +116,20 @@ module.exports.MAX_PHONE_LENGTH = MAX_PHONE_LENGTH;
 module.exports.MAX_EMAIL_LENGTH = MAX_EMAIL_LENGTH;
 module.exports.MAX_MEMO_LENGTH = MAX_MEMO_LENGTH;
 module.exports.MAX_ADMIN_COMMENT_LENGTH = MAX_ADMIN_COMMENT_LENGTH;
+
+module.exports.generateRequestNumber = async function generateRequestNumber() {
+  const ContactModel = mongoose.models.Contact || mongoose.model('Contact');
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const requestNumber = `RQ-${datePart}-${suffix}`;
+    const exists = await ContactModel.exists({ requestNumber });
+
+    if (!exists) {
+      return requestNumber;
+    }
+  }
+
+  throw new Error('요청서 번호 생성에 실패했습니다.');
+};

@@ -9,3 +9,10 @@ export const PROGRAM_TYPES = ['워크샵', '여행', '체육대회', '사내행�
 
 export const MAX_MEMO_LENGTH = 1000
 export const MAX_ADMIN_COMMENT_LENGTH = 2000
+
+export const QUOTE_STATUS_LABELS = {
+  sent: '견적 발송',
+  paid: '결제 완료',
+  expired: '만료',
+  cancelled: '취소',
+}

@@ -126,6 +126,7 @@ function AdminContactsPage() {
 
     return contacts.filter((contact) => {
       const fields = [
+        contact.requestNumber,
         contact.customerName,
         contact.phone,
         contact.email,
@@ -374,6 +375,7 @@ function AdminContactsPage() {
             <table className="admin-contacts-table">
               <thead>
                 <tr>
+                  <th scope="col">요청서 번호</th>
                   <th scope="col">이름</th>
                   <th scope="col">연락처</th>
                   <th scope="col">단체 유형</th>
@@ -387,7 +389,7 @@ function AdminContactsPage() {
               <tbody>
                 {isLoading && (
                   <tr>
-                    <td colSpan={8} className="admin-contacts-table__empty">
+                    <td colSpan={9} className="admin-contacts-table__empty">
                       상담 요청 목록을 불러오는 중...
                     </td>
                   </tr>
@@ -395,7 +397,7 @@ function AdminContactsPage() {
 
                 {!isLoading && filteredContacts.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="admin-contacts-table__empty">
+                    <td colSpan={9} className="admin-contacts-table__empty">
                       {contacts.length === 0 ? '등록된 상담 요청이 없습니다.' : '검색 결과가 없습니다.'}
                     </td>
                   </tr>
@@ -414,6 +416,9 @@ function AdminContactsPage() {
                               : 'admin-contacts-table__row'
                           }
                         >
+                          <td className="admin-contacts-table__request-number">
+                            {contact.requestNumber ?? '-'}
+                          </td>
                           <td>
                             <button
                               type="button"
@@ -445,7 +450,7 @@ function AdminContactsPage() {
 
                         {isExpanded && (
                           <tr className="admin-contacts-table__detail-row">
-                            <td colSpan={8}>
+                            <td colSpan={9}>
                               <div
                                 className="admin-contacts-detail"
                                 id={`admin-contact-detail-${contact._id}`}

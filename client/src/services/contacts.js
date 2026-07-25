@@ -7,6 +7,13 @@ export function createContact(contactData) {
   })
 }
 
+export function lookupContact({ requestNumber, email }) {
+  return apiFetch('/api/contacts/lookup', {
+    method: 'POST',
+    body: JSON.stringify({ requestNumber, email }),
+  })
+}
+
 export function getContacts({ page = 1, limit = 10, groupType, expectedHeadcount, programType } = {}) {
   const params = new URLSearchParams({
     page: String(page),

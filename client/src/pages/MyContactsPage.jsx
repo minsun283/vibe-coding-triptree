@@ -212,7 +212,10 @@ function MyContactsPage() {
                       <h2 className="my-contacts-card__title">
                         {contact.customerName}님 견적요청서
                       </h2>
-                      <p className="my-contacts-card__date">접수일 {formatDate(contact.createdAt)}</p>
+                      <p className="my-contacts-card__date">
+                        {contact.requestNumber ? `요청서 ${contact.requestNumber}` : '요청서 번호 없음'}
+                        {' · '}접수일 {formatDate(contact.createdAt)}
+                      </p>
                     </div>
                     <div className="my-contacts-card__buttons">
                       <button
@@ -234,36 +237,41 @@ function MyContactsPage() {
                     </div>
                   </div>
 
-                  <div className="my-contacts-card__details">
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">단체유형:</span>
-                      {contact.groupType}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">단체프로그램:</span>
-                      {contact.programType}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">예상 인원:</span>
-                      {contact.expectedHeadcount}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">희망 날짜:</span>
-                      {formatPreferredDateRange(contact.preferredDate, contact.preferredEndDate)}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">연락처:</span>
-                      {contact.phone}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">이메일:</span>
-                      {contact.email || '-'}
-                    </p>
-                    <p className="my-contacts-card__detail-line">
-                      <span className="my-contacts-card__detail-label">접수 시간:</span>
-                      {formatDateTime(contact.createdAt)}
-                    </p>
-                  </div>
+                  <section className="my-contacts-card__details" aria-label="신청내용">
+                    <h3 className="my-contacts-card__details-heading">신청내용</h3>
+                    <ul className="my-contacts-detail-list">
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">단체유형</span>
+                        <span className="my-contacts-detail-list__value">{contact.groupType}</span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">단체프로그램</span>
+                        <span className="my-contacts-detail-list__value">{contact.programType}</span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">예상 인원</span>
+                        <span className="my-contacts-detail-list__value">{contact.expectedHeadcount}</span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">희망 날짜</span>
+                        <span className="my-contacts-detail-list__value">
+                          {formatPreferredDateRange(contact.preferredDate, contact.preferredEndDate)}
+                        </span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">연락처</span>
+                        <span className="my-contacts-detail-list__value">{contact.phone}</span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">이메일</span>
+                        <span className="my-contacts-detail-list__value">{contact.email || '-'}</span>
+                      </li>
+                      <li className="my-contacts-detail-list__row">
+                        <span className="my-contacts-detail-list__label">접수 시간</span>
+                        <span className="my-contacts-detail-list__value">{formatDateTime(contact.createdAt)}</span>
+                      </li>
+                    </ul>
+                  </section>
 
                   {contact.memo?.trim() && (
                     <div className="my-contacts-card__memo">

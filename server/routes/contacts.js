@@ -6,6 +6,7 @@ const router = express.Router();
 
 // POST /api/contacts - 상담 문의 접수 (공개, 로그인 시 사용자 연결)
 router.post('/', optionalAuthenticate, contactController.createContact);
+router.post('/lookup', contactController.lookupContact);
 
 // GET /api/contacts - 상담 문의 목록 조회
 //   ?mine=true       내 견적 요청 (로그인)

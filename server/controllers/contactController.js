@@ -6,6 +6,7 @@ const {
   EXPECTED_HEADCOUNTS,
   PROGRAM_TYPES,
   MAX_ADMIN_COMMENT_LENGTH,
+  generateRequestNumber,
 } = require('../models/Contact');
 
 const DEFAULT_LIMIT = 10;
@@ -275,12 +276,70 @@ const createContact = async (req, res) => {
 
     const contact = await Contact.create({
       ...data,
+      requestNumber: await generateRequestNumber(),
       ...(req.user?.userId ? { user: req.user.userId } : {}),
     });
 
     res.status(201).json({
       message: '상담 문의가 접수되었습니다.',
       contact,
+    });
+  } catch (error) {
+    handleContactError(error, res);
+  }
+};
+
+// POST /api/contacts/lookup
+const lookupContact = async (req, res) => {
+  try {
+    const requestNumber = req.body.requestNumber?.trim().toUpperCase();
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!requestNumber || !email) {
+      return res.status(400).json({ message: '요청서 번호와 이메일을 입력해 주세요.' });
+    }
+
+    const contact = await Contact.findOne({ requestNumber, email });
+
+    if (!contact) {
+      return res.status(404).json({
+        message: '요청서를 찾을 수 없습니다. 번호와 이메일을 확인해 주세요.',
+      });
+    }
+
+    const quotes = await Quote.find({ contact: contact._id })
+      .select('title totalAmount status sentAt expiresAt paidAt createdAt payToken')
+      .sort({ createdAt: -1 });
+
+    const serializedQuotes = quotes.map((quote) => {
+      const plain = quote.toObject();
+      delete plain.payToken;
+
+      if (quote.status === 'sent' && quote.payToken) {
+        plain.payUrl = `/quotes/pay/${quote.payToken}`;
+      }
+
+      return plain;
+    });
+
+    res.json({
+      contact: {
+        requestNumber: contact.requestNumber,
+        customerName: contact.customerName,
+        phone: contact.phone,
+        email: contact.email,
+        groupType: contact.groupType,
+        expectedHeadcount: contact.expectedHeadcount,
+        programType: contact.programType,
+        preferredDate: contact.preferredDate,
+        preferredEndDate: contact.preferredEndDate,
+        memo: contact.memo,
+        adminComment: contact.adminComment,
+        adminCommentedAt: contact.adminCommentedAt,
+        createdAt: contact.createdAt,
+        updatedAt: contact.updatedAt,
+      },
+      quotes: serializedQuotes,
     });
   } catch (error) {
     handleContactError(error, res);
@@ -460,6 +519,7 @@ const deleteContact = async (req, res) => {
 
 module.exports = {
   createContact,
+  lookupContact,
   getContacts,
   getContactById,
   updateContact,
