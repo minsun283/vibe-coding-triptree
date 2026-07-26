@@ -1,10 +1,11 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ChevronDown, Search } from 'lucide-react'
 import ProductPagination from '@/components/common/ProductPagination'
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { approveOrderCancellation, getOrders, rejectOrderCancellation, updateOrder } from '@/services/orders'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 import '@/pages/HomePage.css'
 import './AdminOrdersPage.css'
 
@@ -106,6 +107,7 @@ function buildItemMeta(item) {
 
 function AdminOrdersPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { user, isAuthChecked, isAdmin, logout } = useAuthUser()
   const [orders, setOrders] = useState([])
@@ -176,14 +178,14 @@ function AdminOrdersPage() {
     }
 
     if (!user) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: buildLoginRedirect(location) })
       return
     }
 
     if (!isAdmin) {
       navigate('/', { replace: true })
     }
-  }, [isAuthChecked, user, isAdmin, navigate])
+  }, [isAuthChecked, user, isAdmin, location, navigate])
 
   useEffect(() => {
     if (!isAuthChecked || !isAdmin) {

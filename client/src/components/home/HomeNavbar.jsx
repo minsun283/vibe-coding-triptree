@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Globe, Menu, ShoppingCart, User, X } from 'lucide-react'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import useCartCount from '@/hooks/useCartCount'
 import useHasContacts from '@/hooks/useHasContacts'
 import { MY_CONTACTS_PATH } from '@/constants/contactData'
 import { NAV_ITEMS } from '@/constants/homeData'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 
 function HomeNavbar({ user, isAuthChecked, isAdmin, onLogout, variant = 'dark', hideLoginAction = false }) {
+  const location = useLocation()
+  const loginRedirectState = buildLoginRedirect(location)
   const [isMyPageMenuOpen, setIsMyPageMenuOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const myPageMenuRef = useRef(null)
@@ -78,7 +81,7 @@ function HomeNavbar({ user, isAuthChecked, isAdmin, onLogout, variant = 'dark', 
               <span className="home-greeting">{user.name}님 환영합니다</span>
             ) : (
               !hideLoginAction && (
-                <Link to="/login" className="home-login-button">
+                <Link to="/login" state={loginRedirectState} className="home-login-button">
                   로그인
                 </Link>
               )
@@ -199,7 +202,7 @@ function HomeNavbar({ user, isAuthChecked, isAdmin, onLogout, variant = 'dark', 
 
         <div className="home-mobile-nav__actions">
           {isAuthChecked && !user && !hideLoginAction && (
-            <Link to="/login" className="home-mobile-nav__button" onClick={handleMobileNavClick}>
+            <Link to="/login" state={loginRedirectState} className="home-mobile-nav__button" onClick={handleMobileNavClick}>
               로그인
             </Link>
           )}

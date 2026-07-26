@@ -5,6 +5,7 @@ import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { getOrders, requestOrderCancellation } from '@/services/orders'
 import { getReviews } from '@/services/reviews'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 import '@/pages/HomePage.css'
 import './OrdersPage.css'
 
@@ -220,9 +221,9 @@ function OrdersPage() {
 
   useEffect(() => {
     if (isAuthChecked && !user) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: buildLoginRedirect(location) })
     }
-  }, [isAuthChecked, user, navigate])
+  }, [isAuthChecked, user, location, navigate])
 
   useEffect(() => {
     if (location.state?.tab) {

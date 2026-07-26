@@ -13,6 +13,7 @@ import {
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { getCart, notifyCartUpdated } from '@/services/cart'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 import { createOrder } from '@/services/orders'
 import { BANK_ACCOUNT, isBankAccountConfigured } from '@/utils/bankAccount'
 import '@/pages/HomePage.css'
@@ -211,9 +212,9 @@ function CheckoutPage() {
 
   useEffect(() => {
     if (isAuthChecked && !user) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: buildLoginRedirect(location) })
     }
-  }, [isAuthChecked, user, navigate])
+  }, [isAuthChecked, user, location, navigate])
 
   useEffect(() => {
     if (!isAuthChecked || !user) {

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { getCurrentUser, loginUser } from '@/services/api'
 import { saveAuthSession } from '@/services/auth'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import { getPostLoginNavigation } from '@/utils/loginRedirect'
 import '@/pages/HomePage.css'
 import './LoginPage.css'
 
@@ -62,6 +63,7 @@ function AppleIcon() {
 
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isAuthChecked, isAdmin, logout } = useAuthUser()
   const [form, setForm] = useState(initialForm)
   const [rememberMe, setRememberMe] = useState(true)
@@ -71,11 +73,16 @@ function LoginPage() {
   const [loggedInUser, setLoggedInUser] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const navigateAfterLogin = useCallback(() => {
+    const { path, options } = getPostLoginNavigation(location.state)
+    navigate(path, options)
+  }, [location.state, navigate])
+
   useEffect(() => {
     if (isAuthChecked && user) {
-      navigate('/', { replace: true })
+      navigateAfterLogin()
     }
-  }, [isAuthChecked, user, navigate])
+  }, [isAuthChecked, user, navigateAfterLogin])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -100,7 +107,7 @@ function LoginPage() {
 
   const handleCloseSuccessPopup = () => {
     setShowSuccessPopup(false)
-    navigate('/', { replace: true })
+    navigateAfterLogin()
   }
 
   const handleSubmit = async (event) => {

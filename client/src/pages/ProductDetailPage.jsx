@@ -129,7 +129,7 @@ function ProductDetailPage() {
     }
 
     if (!user) {
-      navigate('/login')
+      navigate('/login', { state: { from: `/products/${product._id}` } })
       return
     }
 

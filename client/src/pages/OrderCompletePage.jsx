@@ -4,6 +4,7 @@ import { Check, Package, XCircle } from 'lucide-react'
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { formatBankAccountLine } from '@/utils/bankAccount'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 import '@/pages/HomePage.css'
 import './OrderCompletePage.css'
 
@@ -54,14 +55,14 @@ function OrderCompletePage() {
     }
 
     if (!user) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: buildLoginRedirect(location) })
       return
     }
 
     if (!status) {
       navigate('/cart', { replace: true })
     }
-  }, [isAuthChecked, user, status, navigate])
+  }, [isAuthChecked, user, status, location, navigate])
 
   if (!isAuthChecked || !user || !status) {
     return null

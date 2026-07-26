@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import HomeNavbar from '@/components/home/HomeNavbar'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { getCart, notifyCartUpdated, removeCartItem, updateCartItem } from '@/services/cart'
+import { buildLoginRedirect } from '@/utils/loginRedirect'
 import '@/pages/HomePage.css'
 import './CartPage.css'
 
@@ -13,6 +14,7 @@ function formatPrice(price) {
 
 function CartPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isAuthChecked, isAdmin, logout } = useAuthUser()
   const [cart, setCart] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -44,9 +46,9 @@ function CartPage() {
 
   useEffect(() => {
     if (isAuthChecked && !user) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: buildLoginRedirect(location) })
     }
-  }, [isAuthChecked, user, navigate])
+  }, [isAuthChecked, user, location, navigate])
 
   useEffect(() => {
     if (!isAuthChecked || !user) {
